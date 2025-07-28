@@ -1,0 +1,11 @@
+.topbar {
+  /* topbar main layout handled in App.css for theming and base structure */
+}
+
+.topbar-title {
+  /* for consistent typography if custom styles are desired */
+}
+
+.topbar-actions {
+  /* actively used for future filter/export actions */
+}

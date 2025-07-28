@@ -1,0 +1,16 @@
+.sidebar {
+  /* styles primarily in App.css for layout and responsiveness */
+}
+
+.sidebar-header {
+  /* mostly styled in App.css, kept for future extension */
+}
+
+.sidebar-link {
+  font-family: inherit;
+  background: none;
+  outline: none;
+}
+.sidebar-link.active {
+  font-weight: 600;
+}
