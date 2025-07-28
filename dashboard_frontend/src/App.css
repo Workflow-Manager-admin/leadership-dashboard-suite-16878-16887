@@ -1,14 +1,39 @@
 /* CSS Variables for Theme Management */
 :root {
-  /* Light theme colors */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fa;
-  --text-primary: #282c34;
-  --text-secondary: #61dafb;
-  --border-color: #e9ecef;
-  --button-bg: #007bff;
-  --button-text: #ffffff;
+  /* Light theme colors based on specified dashboard palette */
+  --primary: #0057B8;
+  --secondary: #101820;
+  --accent: #FEE715;
+  --kavia-orange: #E87A41;
+  --kavia-dark: #23242a;
+
+  --bg-primary: #fff;
+  --bg-secondary: #f6f8fa;
+  --bg-dark: #101820;
+  --text-primary: #101820;
+  --text-secondary: #555f7a;
+  --border-color: #e5e7ea;
+  --button-bg: var(--primary);
+  --button-text: #fff;
+  --sidebar-bg: #101820;
+  --sidebar-highlight: #173458;
+  --sidebar-link-active: var(--primary);
 }
+
+[data-theme="dark"] {
+  /* Dark theme colors */
+  --bg-primary: #181920;
+  --bg-secondary: #23242a;
+  --text-primary: #ededed;
+  --text-secondary: #b3b7c5;
+  --border-color: #293046;
+  --button-bg: #222e4b;
+  --button-text: #fff;
+  --sidebar-bg: #16181d;
+  --sidebar-highlight: #232746;
+  --sidebar-link-active: #FEE715;
+}
+
 
 [data-theme="dark"] {
   /* Dark theme colors */
