@@ -1,92 +1,103 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 import "./App.css";
 
 /**
- * Stub page components for each route.
+ * Page content for each menu
  */
-function DashboardPage() {
+function DashboardSection() {
   return (
-    <div className="page-content">
-      <h2>Dashboard</h2>
-      <p>Interactive dashboards, KPIs, and summary insights go here.</p>
+    <div>
+      <h1 className="section-title">Dashboard</h1>
+      <div className="section-description">Interactive KPIs, metrics, and executive summary dashboards.</div>
+      <div className="data-section-card">[Dashboard analytics and charts]</div>
     </div>
   );
 }
-function IngestionPage() {
+function DataConfigSection() {
   return (
-    <div className="page-content">
-      <h2>Ingestion</h2>
-      <p>Folder mapping and file ingestion management.</p>
+    <div>
+      <h1 className="section-title">Data Configuration</h1>
+      <div className="section-description">Configure source folders, manage ingestion, and data mappings.</div>
+      <div className="data-section-card">[Configurable folder or mapping/data UI here]</div>
     </div>
   );
 }
-function TemplatesPage() {
+function TemplatesSection() {
   return (
-    <div className="page-content">
-      <h2>Templates</h2>
-      <p>Dashboard template creation and management.</p>
+    <div>
+      <h1 className="section-title">Templates</h1>
+      <div className="section-description">Dashboard template library and creation tools.</div>
+      <div className="data-section-card">[Templates list and management]</div>
     </div>
   );
 }
-function SchedulingPage() {
+function SettingsSection() {
   return (
-    <div className="page-content">
-      <h2>Scheduling</h2>
-      <p>Reporting schedule and email delivery.</p>
+    <div>
+      <h1 className="section-title">Settings</h1>
+      <div className="section-description">System, user preferences, and application settings.</div>
+      <div className="data-section-card">[Settings/configure area]</div>
     </div>
   );
 }
-function SettingsPage() {
-  return (
-    <div className="page-content">
-      <h2>Settings</h2>
-      <p>Configuration and preferences.</p>
-    </div>
-  );
-}
+
+// Menu structure for nav
+const menuList = [
+  { name: "Dashboard", key: "dashboard" },
+  { name: "Data Configuration", key: "data" },
+  { name: "Templates", key: "templates" },
+  { name: "Settings", key: "settings" }
+];
 
 /**
  * PUBLIC_INTERFACE
- * Main App shell — flex layout with sidebar, top bar, theme toggle,
- * and client-side routing to main dashboard sections.
+ * Main App — top bar navigation, dark theme, switches between section content.
  */
 function App() {
-  const [theme, setTheme] = useState("light");
+  // Theme state: dark by default
+  const [theme, setTheme] = useState("dark");
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
+
+  const [menu, setMenu] = useState("dashboard");
+
+  function renderSection() {
+    switch (menu) {
+      case "dashboard":
+        return <DashboardSection />;
+      case "data":
+        return <DataConfigSection />;
+      case "templates":
+        return <TemplatesSection />;
+      case "settings":
+        return <SettingsSection />;
+      default:
+        return <DashboardSection />;
+    }
+  }
 
   return (
-    <Router>
-      <div className="app-shell">
-        <Sidebar />
-        <div className="main-panel">
-          <button
-            className="theme-toggle"
-            onClick={toggleTheme}
-            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-          >
-            {theme === "light" ? "🌙 Dark" : "☀️ Light"}
-          </button>
-          <TopBar />
-          <main className="page-main">
-            <Routes>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/ingestion" element={<IngestionPage />} />
-              <Route path="/templates" element={<TemplatesPage />} />
-              <Route path="/scheduling" element={<SchedulingPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-            </Routes>
-          </main>
-        </div>
-      </div>
-    </Router>
+    <div className="App">
+      <TopBar
+        menus={menuList}
+        selected={menu}
+        onMenuSelect={setMenu}
+      >
+        <button
+          className="btn"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          style={{ fontSize: 16 }}
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+        >
+          {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+        </button>
+      </TopBar>
+      <main className="main-panel">
+        {renderSection()}
+      </main>
+    </div>
   );
 }
 
