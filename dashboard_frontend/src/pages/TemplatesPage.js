@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { listTemplates } from "../api";
+import { listTemplates, createTemplate } from "../api";
 import DataTable from "../components/DataTable";
 import InfoCard from "../components/InfoCard";
 import ConfigForm from "../components/ConfigForm";
@@ -13,28 +13,52 @@ function TemplatesPage() {
   const [templates, setTemplates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  // For creation form stub, not fully implemented
   const [tplFields, setTplFields] = useState({
     name: "",
     template_id: ""
-    // config can be extended
   });
+  const [creating, setCreating] = useState(false);
+  const [createMsg, setCreateMsg] = useState(null);
 
-  useEffect(() => {
+  function fetchTemplates() {
     setLoading(true);
     setError(null);
     listTemplates()
       .then((data) => setTemplates(data))
       .catch((e) => setError(e?.message || "Error loading templates"))
       .finally(() => setLoading(false));
+  }
+
+  useEffect(() => {
+    fetchTemplates();
   }, []);
 
   function handleTplChange(name, value) {
     setTplFields(f => ({ ...f, [name]: value }));
   }
-  function handleTplCreate(e) {
+
+  async function handleTplCreate(e) {
     e.preventDefault();
-    alert("[Stub: Implement createTemplate()]");
+    if (!tplFields.name || !tplFields.template_id) {
+      setCreateMsg({ type: "error", msg: "Both Name and Template ID required" });
+      return;
+    }
+    setCreating(true);
+    setCreateMsg(null);
+    try {
+      await createTemplate({
+        name: tplFields.name,
+        template_id: tplFields.template_id,
+        config: {} // minimal, can extend with fields for richer templates
+      });
+      setCreateMsg({ type: "success", msg: "Template created!"});
+      setTplFields({ name: "", template_id: "" });
+      fetchTemplates();
+    } catch (e) {
+      setCreateMsg({ type: "error", msg: e?.message || "Failed to create" });
+    } finally {
+      setCreating(false);
+    }
   }
 
   return (
@@ -70,10 +94,17 @@ function TemplatesPage() {
           ]}
           onChange={handleTplChange}
           onSubmit={handleTplCreate}
-          submitLabel="Create Template"
-          disabled={false}
+          submitLabel={creating ? "Creating..." : "Create Template"}
+          disabled={creating}
         />
-        <div style={{ color: "#888", fontSize: 13 }}>[Stub: To be implemented]</div>
+        {createMsg && (
+          <div style={{
+            color: createMsg.type === "error" ? "red" : "#08a408",
+            fontSize: 15, margin: "7px 0 0 2px"
+          }}>
+            {createMsg.msg}
+          </div>
+        )}
       </InfoCard>
       <p style={{ color: "#777" }}>
         Download, manage, and reuse dashboard templates.

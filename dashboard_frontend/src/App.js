@@ -1,46 +1,10 @@
 import React, { useState, useEffect } from "react";
 import TopBar from "./components/TopBar";
 import "./App.css";
-
-/**
- * Page content for each menu
- */
-function DashboardSection() {
-  return (
-    <div>
-      <h1 className="section-title">Dashboard</h1>
-      <div className="section-description">Interactive KPIs, metrics, and executive summary dashboards.</div>
-      <div className="data-section-card">[Dashboard analytics and charts]</div>
-    </div>
-  );
-}
-function DataConfigSection() {
-  return (
-    <div>
-      <h1 className="section-title">Data Configuration</h1>
-      <div className="section-description">Configure source folders, manage ingestion, and data mappings.</div>
-      <div className="data-section-card">[Configurable folder or mapping/data UI here]</div>
-    </div>
-  );
-}
-function TemplatesSection() {
-  return (
-    <div>
-      <h1 className="section-title">Templates</h1>
-      <div className="section-description">Dashboard template library and creation tools.</div>
-      <div className="data-section-card">[Templates list and management]</div>
-    </div>
-  );
-}
-function SettingsSection() {
-  return (
-    <div>
-      <h1 className="section-title">Settings</h1>
-      <div className="section-description">System, user preferences, and application settings.</div>
-      <div className="data-section-card">[Settings/configure area]</div>
-    </div>
-  );
-}
+import DashboardPage from "./pages/DashboardPage";
+import IngestionPage from "./pages/IngestionPage";
+import TemplatesPage from "./pages/TemplatesPage";
+import SettingsPage from "./pages/SettingsPage";
 
 // Menu structure for nav
 const menuList = [
@@ -53,6 +17,7 @@ const menuList = [
 /**
  * PUBLIC_INTERFACE
  * Main App — top bar navigation, dark theme, switches between section content.
+ * Connects each menu section to its full-featured page/component.
  */
 function App() {
   // Theme state: dark by default
@@ -66,15 +31,15 @@ function App() {
   function renderSection() {
     switch (menu) {
       case "dashboard":
-        return <DashboardSection />;
+        return <DashboardPage />;
       case "data":
-        return <DataConfigSection />;
+        return <IngestionPage />;
       case "templates":
-        return <TemplatesSection />;
+        return <TemplatesPage />;
       case "settings":
-        return <SettingsSection />;
+        return <SettingsPage />;
       default:
-        return <DashboardSection />;
+        return <DashboardPage />;
     }
   }
 
