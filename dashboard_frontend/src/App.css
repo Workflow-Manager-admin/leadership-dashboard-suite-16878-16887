@@ -177,6 +177,7 @@
   padding: 26px 34px 36px 32px;
   background: var(--bg-primary);
   min-width: 0;
+  font-family: Verdana, sans-serif !important;
 }
 .page-content {
   width: 100%;

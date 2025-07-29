@@ -53,7 +53,15 @@ function LoginPage() {
             border: "1px solid var(--border-color,#ccd)", background: "var(--bg-primary,#fff)"
           }}
         />
-        <label htmlFor="password" style={{fontWeight:600}}>Password</label>
+        <label htmlFor="password" style={{
+          fontWeight: 600,
+          color: "rgb(0, 0, 0)",
+          fontFamily: "Verdana, sans-serif",
+          fontSize: "16px",
+          fontStyle: "normal",
+          textDecoration: "none",
+          textAlign: "left"
+        }}>Password</label>
         <input
           id="password"
           type="password"
