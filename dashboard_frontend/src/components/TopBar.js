@@ -1,19 +1,39 @@
 import React from "react";
-import "./TopBar.css";
-
 /**
  * PUBLIC_INTERFACE
- * TopBar component at the top of the main panel.
- * Used for global actions like filtering, exporting, etc.
+ * TopBar (Navigation Bar): Provides menu for app sections and theme toggling.
+ * Props:
+ *   - menus: array of { name, key }
+ *   - selected: string (selected key)
+ *   - onMenuSelect: (key) => void
+ *   - children: right-aligned content (optional)
  */
-function TopBar({ title }) {
+function TopBar({ menus, selected, onMenuSelect, children }) {
   return (
-    <header className="topbar">
-      <div className="topbar-title">{title || "Dashboard"}</div>
-      <div className="topbar-actions">
-        {/* Placeholder for filter/export/action buttons */}
+    <nav className="topnav" role="navigation" aria-label="Main navigation">
+      <span className="topnav-logo" tabIndex={0}>
+        SLT Dashboard
+      </span>
+      <div className="topnav-menu" role="menubar">
+        {(menus || []).map((menu) => (
+          <button
+            className={`topnav-menuitem${selected === menu.key ? " selected" : ""}`}
+            key={menu.key}
+            onClick={() => onMenuSelect(menu.key)}
+            tabIndex={0}
+            aria-label={menu.name}
+            aria-current={selected === menu.key ? "page" : undefined}
+            type="button"
+          >
+            {menu.name}
+          </button>
+        ))}
       </div>
-    </header>
+      <div className="topnav-right">
+        {/* Theme toggle icon will be injected here */}
+        {children}
+      </div>
+    </nav>
   );
 }
 

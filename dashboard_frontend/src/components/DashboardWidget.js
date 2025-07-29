@@ -11,16 +11,17 @@ function DashboardWidget({ title, children }) {
   return (
     <section className="dashboard-widget"
       style={{
-        border: "1px solid var(--border-color, #e9ecef)",
-        borderRadius: 8,
-        padding: 20,
+        border: "1.7px solid var(--border-color)",
+        borderRadius: 13,
+        padding: "18px 24px",
         margin: "14px 0",
-        background: "var(--bg-secondary, #f8f9fa)",
+        background: "var(--background-tertiary)",
         minWidth: 220,
         maxWidth: 440,
-        boxShadow: "0 1px 4px rgba(0,0,0,0.04)",
+        boxShadow: "var(--shadow)",
+        fontFamily: "var(--font-main)",
       }}>
-      <div style={{ fontWeight: 600, fontSize: 18, marginBottom: 8 }}>
+      <div style={{ fontWeight: 700, fontSize: "1.16rem", marginBottom: 10, color: "var(--accent)" }}>
         {title || "[Widget Title]"}
       </div>
       <div>

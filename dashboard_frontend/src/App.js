@@ -1,92 +1,100 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Sidebar from "./components/Sidebar";
 import TopBar from "./components/TopBar";
 import "./App.css";
+import DashboardPage from "./pages/DashboardPage";
+import IngestionPage from "./pages/IngestionPage";
+import TemplatesPage from "./pages/TemplatesPage";
+import SettingsPage from "./pages/SettingsPage";
 
-/**
- * Stub page components for each route.
- */
-function DashboardPage() {
-  return (
-    <div className="page-content">
-      <h2>Dashboard</h2>
-      <p>Interactive dashboards, KPIs, and summary insights go here.</p>
-    </div>
-  );
-}
-function IngestionPage() {
-  return (
-    <div className="page-content">
-      <h2>Ingestion</h2>
-      <p>Folder mapping and file ingestion management.</p>
-    </div>
-  );
-}
-function TemplatesPage() {
-  return (
-    <div className="page-content">
-      <h2>Templates</h2>
-      <p>Dashboard template creation and management.</p>
-    </div>
-  );
-}
-function SchedulingPage() {
-  return (
-    <div className="page-content">
-      <h2>Scheduling</h2>
-      <p>Reporting schedule and email delivery.</p>
-    </div>
-  );
-}
-function SettingsPage() {
-  return (
-    <div className="page-content">
-      <h2>Settings</h2>
-      <p>Configuration and preferences.</p>
-    </div>
-  );
-}
+// Menu structure for nav
+const menuList = [
+  { name: "Dashboard", key: "dashboard" },
+  { name: "Data Configuration", key: "data" },
+  { name: "Templates", key: "templates" },
+  { name: "Settings", key: "settings" }
+];
 
 /**
  * PUBLIC_INTERFACE
- * Main App shell — flex layout with sidebar, top bar, theme toggle,
- * and client-side routing to main dashboard sections.
+ * Main App — top bar navigation, dark theme, switches between section content.
+ * Connects each menu section to its full-featured page/component.
  */
 function App() {
-  const [theme, setTheme] = useState("light");
+  // Theme state: dark by default (persist with localStorage if desired)
+  const [theme, setTheme] = useState(() =>
+    window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
+  );
+
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === "light" ? "dark" : "light"));
-  };
+
+  const [menu, setMenu] = useState("dashboard");
+
+  function renderSection() {
+    switch (menu) {
+      case "dashboard":
+        return <DashboardPage />;
+      case "data":
+        return <IngestionPage />;
+      case "templates":
+        return <TemplatesPage />;
+      case "settings":
+        return <SettingsPage />;
+      default:
+        return <DashboardPage />;
+    }
+  }
+
+  const toggleTheme = () =>
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
 
   return (
-    <Router>
-      <div className="app-shell">
-        <Sidebar />
-        <div className="main-panel">
-          <button
-            className="theme-toggle"
-            onClick={toggleTheme}
-            aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-          >
-            {theme === "light" ? "🌙 Dark" : "☀️ Light"}
-          </button>
-          <TopBar />
-          <main className="page-main">
-            <Routes>
-              <Route path="/" element={<DashboardPage />} />
-              <Route path="/ingestion" element={<IngestionPage />} />
-              <Route path="/templates" element={<TemplatesPage />} />
-              <Route path="/scheduling" element={<SchedulingPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-            </Routes>
-          </main>
-        </div>
-      </div>
-    </Router>
+    <div className="App">
+      <TopBar
+        menus={menuList}
+        selected={menu}
+        onMenuSelect={setMenu}
+      >
+        <button
+          className="btn"
+          type="button"
+          aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          onClick={toggleTheme}
+          style={{
+            fontSize: 16,
+            display: "flex",
+            gap: 7,
+            alignItems: "center",
+            padding: "9px 14px",
+            fontWeight: 600,
+            background: "transparent",
+            border: "1.2px solid var(--border-color)",
+            color: "var(--text-primary)",
+            borderRadius: 22,
+            boxShadow: "none",
+            margin: "0 0 0 10px",
+            cursor: "pointer",
+            transition: "background .17s, color .17s, border .12s"
+          }}
+        >
+          {theme === "dark" ? (
+            <>
+              <span style={{fontSize:22}}>☀️</span>
+              Light
+            </>
+          ) : (
+            <>
+              <span style={{fontSize:20}}>🌙</span>
+              Dark
+            </>
+          )}
+        </button>
+      </TopBar>
+      <main className="main-panel">
+        {renderSection()}
+      </main>
+    </div>
   );
 }
 
