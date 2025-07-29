@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { listDashboardConfigs } from "../api";
+import { Link } from "react-router-dom";
 
 /**
  * PUBLIC_INTERFACE
@@ -23,6 +24,24 @@ function DashboardPage() {
   return (
     <div className="page-content">
       <h1>Dashboard</h1>
+      <p>
+        <Link
+          to="/dashboard/config"
+          style={{
+            border: "1.3px solid #e3e4ed",
+            padding: "7px 18px",
+            borderRadius: 8,
+            fontWeight: 600,
+            fontSize: 16,
+            background: "#fafbfe",
+            color: "#0057B8",
+            marginRight: 12,
+            textDecoration: "none",
+          }}
+        >
+          ⚙️ Configure Dashboard
+        </Link>
+      </p>
       <p>
         {loading && <span>Loading dashboards...</span>}
         {error && <span style={{ color: "red" }}>Error: {error}</span>}

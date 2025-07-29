@@ -14,6 +14,7 @@ import SchedulePage from "./pages/SchedulePage";
 import SettingsPage from "./pages/SettingsPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import DashboardConfigPage from "./pages/DashboardConfigPage";
 
 /**
  * PUBLIC_INTERFACE
@@ -52,6 +53,7 @@ function App() {
                 {/* Private routes require authentication */}
                 <Route element={<PrivateRoute />}>
                   <Route path="/" element={<DashboardPage />} />
+                  <Route path="/dashboard/config" element={<DashboardConfigPage />} />
                   <Route path="/ingestion" element={<IngestionPage />} />
                   <Route path="/templates" element={<TemplatesPage />} />
                   <Route path="/scheduling" element={<SchedulePage />} />
