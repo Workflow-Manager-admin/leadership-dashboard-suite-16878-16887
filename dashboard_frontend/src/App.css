@@ -8,16 +8,25 @@
   --kavia-dark: #23242a;
 
   --bg-primary: #fff;
-  --bg-secondary: #f6f8fa;
+  --bg-secondary: #f8fafc;
   --bg-dark: #101820;
   --text-primary: #101820;
-  --text-secondary: #555f7a;
+  --text-secondary: #323c52;
   --border-color: #e5e7ea;
   --button-bg: var(--primary);
   --button-text: #fff;
+  --button-border: rgba(0, 87, 184, 0.17);
+  --button-hover-bg: #fee715;
+  --button-hover-text: #101820;
   --sidebar-bg: #101820;
   --sidebar-highlight: #173458;
-  --sidebar-link-active: var(--primary);
+  --sidebar-link-active: var(--accent);
+  --card-bg: #fffbe9;
+}
+
+/* Modern, subtle shadow utility */
+.shadow-1 {
+  box-shadow: 0 2px 12px 0 rgba(50, 86, 135, 0.11);
 }
 
 [data-theme="dark"] {
@@ -207,6 +216,81 @@
     padding: 15px 7px 28px 9px;
   }
 }
+
+/* ---- Modern Button Styles ---- */
+.btn {
+  appearance: none;
+  border: none;
+  outline: none;
+  background: var(--button-bg, #0057B8);
+  color: var(--button-text, #fff);
+  padding: 9px 24px;
+  border-radius: 7px;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  box-shadow: 0 2px 6px rgba(20,40,80,0.055);
+  cursor: pointer;
+  transition: background 0.20s, color 0.19s, box-shadow 0.19s, border 0.16s;
+  border: 1.5px solid var(--button-border, #dee4ee);
+}
+
+.btn:hover, .btn:focus {
+  background: var(--button-hover-bg, #FEE715);
+  color: var(--button-hover-text, #101820);
+  border-color: var(--primary, #0057B8);
+  box-shadow: 0 5px 22px -5px var(--primary, #0057B8)33;
+}
+
+.btn:active {
+  background: var(--primary, #0057B8);
+  color: #fff;
+  outline: none;
+}
+
+/* .btn-secondary for secondary action buttons */
+.btn-secondary {
+  background: transparent;
+  color: var(--primary, #0057B8);
+  border: 1.3px solid var(--primary, #0057B8);
+  font-weight: 600;
+}
+
+.btn-secondary:hover, .btn-secondary:focus {
+  background: var(--accent, #fee715);
+  color: var(--secondary, #101820);
+  border-color: var(--primary, #0057B8);
+}
+
+/* ---- Inputs and "card" look ---- */
+input, select, textarea {
+  background: var(--bg-primary, #fffbe9);
+  border: 1.2px solid var(--border-color, #dce1ea);
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 15px;
+  font-family: inherit;
+  color: var(--text-primary, #101820);
+  margin-bottom: 9px;
+  transition: border 0.19s, box-shadow 0.19s;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--primary, #0057B8);
+  outline: none;
+  box-shadow: 0 0 2px 1px var(--accent, #fee715)44;
+}
+
+/* Card/Panel appearance, used for content boxes */
+.card, .modern-card {
+  background: var(--card-bg, #fffbe9);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(17,36,76,0.09);
+  padding: 34px 32px;
+  margin: 22px 0;
+  border: 1.5px solid var(--border-color, #ececec);
+}
+
 
 .App-logo {
   height: 40vmin;
