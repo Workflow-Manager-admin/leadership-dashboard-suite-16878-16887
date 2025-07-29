@@ -16,11 +16,26 @@ function buildUrl(path) {
   return `${BASE_URL}/${path}`;
 }
 
+// Helper to inject JWT for certain APIs
+function authHeaders() {
+  let t = "";
+  try {
+    t = localStorage.getItem("slt_jwt_token") || sessionStorage.getItem("slt_jwt_token") || "";
+  } catch {}
+  return t ? { Authorization: `Bearer ${t}` } : {};
+}
+
 // Helper for GET requests
 async function get(url, opts = {}) {
+  // Automatic Bearer injection for '/api/user/*', could be improved for all private endpoints
+  let headers = { ...(opts.headers || {}) };
+  if (url.startsWith("/api/user/")) {
+    headers = { ...headers, ...authHeaders() };
+  }
   const resp = await fetch(buildUrl(url), {
     method: "GET",
     credentials: "same-origin",
+    headers,
     ...opts,
   });
   if (!resp.ok) throw new Error("GET " + url + " failed: " + resp.status);
@@ -37,6 +52,7 @@ async function post(url, data, opts = {}) {
     headers = { 'Content-Type': 'application/json', ...headers };
     body = JSON.stringify(data);
   }
+  // Auth injection for project/team create can be added here as needed
   const resp = await fetch(buildUrl(url), {
     method: "POST",
     body,
