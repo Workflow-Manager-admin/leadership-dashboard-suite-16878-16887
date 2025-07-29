@@ -1,13 +1,36 @@
 :root {
-  --background: #2d2d2d;
-  --background-secondary: #222426;
-  --background-tertiary: #383a40;
-  --text-primary: #ffffff;
-  --text-secondary: #e0e0e0;
-  --border-color: #323232;
+  --background: #23262b;
+  --background-secondary: #20222e;
+  --background-tertiary: #31334b;
+  --text-primary: #f7f8fa;
+  --text-secondary: #bfc7d5;
+  --border-color: #404356;
   --primary-accent: #0a84ff;
   --primary: #0057B8;
   --accent: #FEE715;
+  --input-bg: #181a25;
+  --input-border: #45465a;
+  --input-focus: #2684ff;
+  --shadow: 0 1.5px 8px 0 #06101a32;
+  --font-main: 'Segoe UI', 'Roboto', 'Oxygen', Arial, sans-serif;
+  --font-mono: 'Fira Mono', 'Consolas', 'monospace';
+  --transition: background 0.23s, color 0.21s, border 0.21s;
+}
+/* Light theme overrides */
+[data-theme='light'] {
+  --background: #f5f6f8;
+  --background-secondary: #eaeef3;
+  --background-tertiary: #fff;
+  --text-primary: #1b2432;
+  --text-secondary: #596377;
+  --border-color: #dae3e7;
+  --primary-accent: #1060cf;
+  --primary: #0057B8;
+  --accent: #FEE715;
+  --input-bg: #fff;
+  --input-border: #b2bac5;
+  --input-focus: #1789fb;
+  --shadow: 0 1.5px 7px 0 #c7dbe944;
 }
 
 body, .App {
@@ -115,25 +138,59 @@ body, .App {
   box-shadow: 0 1.5px 6px 0 #00000013;
 }
 
-/* Simple button (for theme/config actions) */
+/* Buttons */
 .btn {
-  background: var(--primary-accent, #0a84ff);
+  background: var(--primary-accent);
   border: none;
-  border-radius: 5px;
-  color: #fff;
+  border-radius: 6px;
+  color: var(--text-primary);
   font-weight: 600;
-  font-size: 1rem;
-  padding: 9px 16px;
+  font-family: var(--font-main);
+  font-size: 1.05rem;
+  padding: 10px 20px;
   margin: 8px 0;
   cursor: pointer;
-  transition: background 0.17s;
-}
-.btn:active, .btn:focus, .btn:hover {
-  background: #1060cc;
+  box-shadow: 0 2px 8px -4px var(--primary-accent, #0a84ff)33;
+  transition: background 0.16s, box-shadow 0.14s, color 0.15s;
   outline: none;
 }
+.btn:active, .btn:focus, .btn:hover {
+  background: var(--input-focus);
+  color: #fff;
+  outline: none;
+}
+.btn:disabled {
+  opacity: 0.5;
+  background: var(--primary-accent);
+  color: #dedede;
+  cursor: not-allowed;
+}
 
-/* Other Utility */
+input, select, textarea {
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 1rem;
+  padding: 8px 13px;
+  border: 1.5px solid var(--input-border);
+  border-radius: 4px;
+  font-family: var(--font-main);
+  box-shadow: none;
+  outline: none;
+  margin-top: 6px;
+  transition: var(--transition);
+}
+input:focus, select:focus, textarea:focus {
+  border-color: var(--input-focus);
+  background: var(--background-tertiary);
+}
+input[disabled], select[disabled], textarea[disabled] {
+  color: #aaa;
+  background: var(--background-secondary);
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+/* Utility & scrollbar tweaks */
 ::-webkit-scrollbar-thumb {
   background: var(--background-tertiary);
 }

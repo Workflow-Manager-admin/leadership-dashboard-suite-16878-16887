@@ -19,22 +19,36 @@ function ConfigForm({ fields = [], onChange, onSubmit, submitLabel = "Save", dis
       padding: "14px 0"
     }}>
       {fields.map(f =>
-        <label key={f.name} style={{ color: "var(--text-primary)", fontWeight: 600 }}>
+        <label
+          key={f.name}
+          style={{
+            color: "var(--text-primary)",
+            fontWeight: 600,
+            marginBottom: 2,
+            fontSize: "1rem"
+          }}
+        >
           {f.label}
           <input
             style={{
               marginLeft: 13,
-              background: "var(--background-secondary)",
+              background: "var(--input-bg)",
               color: "var(--text-primary)",
-              border: "1px solid var(--border-color)",
+              border: "1.4px solid var(--input-border)",
               borderRadius: 5,
-              padding: "8px 12px"
+              padding: "8px 13px",
+              marginTop: 2,
+              marginBottom: 4,
+              transition: "var(--transition)",
+              fontSize: "1rem",
+              boxShadow: "none"
             }}
             type={f.type || "text"}
             value={f.value || ""}
             disabled={disabled}
             onChange={e => onChange(f.name, e.target.value)}
             name={f.name}
+            autoComplete="off"
           />
         </label>
       )}

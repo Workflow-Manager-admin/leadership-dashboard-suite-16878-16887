@@ -10,8 +10,10 @@ import React from "react";
  */
 function TopBar({ menus, selected, onMenuSelect, children }) {
   return (
-    <nav className="topnav">
-      <span className="topnav-logo">SLT Dashboard</span>
+    <nav className="topnav" role="navigation" aria-label="Main navigation">
+      <span className="topnav-logo" tabIndex={0}>
+        SLT Dashboard
+      </span>
       <div className="topnav-menu" role="menubar">
         {(menus || []).map((menu) => (
           <button
@@ -21,12 +23,14 @@ function TopBar({ menus, selected, onMenuSelect, children }) {
             tabIndex={0}
             aria-label={menu.name}
             aria-current={selected === menu.key ? "page" : undefined}
+            type="button"
           >
             {menu.name}
           </button>
         ))}
       </div>
       <div className="topnav-right">
+        {/* Theme toggle icon will be injected here */}
         {children}
       </div>
     </nav>

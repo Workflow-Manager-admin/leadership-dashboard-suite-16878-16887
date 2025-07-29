@@ -20,8 +20,11 @@ const menuList = [
  * Connects each menu section to its full-featured page/component.
  */
 function App() {
-  // Theme state: dark by default
-  const [theme, setTheme] = useState("dark");
+  // Theme state: dark by default (persist with localStorage if desired)
+  const [theme, setTheme] = useState(() =>
+    window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
+  );
+
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
@@ -43,6 +46,9 @@ function App() {
     }
   }
 
+  const toggleTheme = () =>
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+
   return (
     <div className="App">
       <TopBar
@@ -52,11 +58,37 @@ function App() {
       >
         <button
           className="btn"
-          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-          style={{ fontSize: 16 }}
+          type="button"
           aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+          onClick={toggleTheme}
+          style={{
+            fontSize: 16,
+            display: "flex",
+            gap: 7,
+            alignItems: "center",
+            padding: "9px 14px",
+            fontWeight: 600,
+            background: "transparent",
+            border: "1.2px solid var(--border-color)",
+            color: "var(--text-primary)",
+            borderRadius: 22,
+            boxShadow: "none",
+            margin: "0 0 0 10px",
+            cursor: "pointer",
+            transition: "background .17s, color .17s, border .12s"
+          }}
         >
-          {theme === "dark" ? "☀️ Light" : "🌙 Dark"}
+          {theme === "dark" ? (
+            <>
+              <span style={{fontSize:22}}>☀️</span>
+              Light
+            </>
+          ) : (
+            <>
+              <span style={{fontSize:20}}>🌙</span>
+              Dark
+            </>
+          )}
         </button>
       </TopBar>
       <main className="main-panel">

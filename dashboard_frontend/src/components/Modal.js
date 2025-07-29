@@ -21,17 +21,18 @@ function Modal({ isOpen, onClose, title, children }) {
       justifyContent: "center"
     }}>
       <div className="modal" style={{
-        background: "var(--bg-primary, #fff)",
-        color: "var(--text-primary, #222)",
-        borderRadius: 12,
+        background: "var(--background-tertiary)",
+        color: "var(--text-primary)",
+        borderRadius: 14,
         minWidth: 340,
         minHeight: 120,
         maxWidth: "95vw",
         maxHeight: "88vh",
-        boxShadow: "0 4px 32px rgba(0,0,0,.18)",
-        padding: 24,
+        boxShadow: "var(--shadow)",
+        padding: 28,
         textAlign: "left",
         position: "relative",
+        border: "1.6px solid var(--border-color)"
       }}>
         {title && <h2 style={{margin:"0 0 16px 0"}}>{title}</h2>}
         <button

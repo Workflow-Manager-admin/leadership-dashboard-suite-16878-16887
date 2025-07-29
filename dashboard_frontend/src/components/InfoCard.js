@@ -12,15 +12,15 @@ function InfoCard({ title, description, children }) {
   return (
     <div style={{
       background: "var(--background-tertiary)",
-      border: "1.5px solid var(--border-color)",
-      borderRadius: 12,
-      padding: "18px 18px 14px 18px",
-      margin: "14px 0",
+      border: "1.7px solid var(--border-color)",
+      borderRadius: 13,
+      padding: "21px 24px 16px 24px",
+      margin: "18px 0",
       color: "var(--text-primary)",
-      boxShadow: "0 2px 10px 0 #00000013"
+      boxShadow: "var(--shadow)"
     }}>
-      {title && <div style={{ fontWeight: 600, fontSize: 17, marginBottom: 3, color: "var(--accent)" }}>{title}</div>}
-      {description && <div style={{ color: "var(--text-secondary)", fontSize: 14, marginBottom: 8 }}>{description}</div>}
+      {title && <div style={{ fontWeight: 700, fontSize: "1.09rem", marginBottom: 5, color: "var(--accent)" }}>{title}</div>}
+      {description && <div style={{ color: "var(--text-secondary)", fontSize: 15, marginBottom: 10 }}>{description}</div>}
       <div>{children}</div>
     </div>
   );

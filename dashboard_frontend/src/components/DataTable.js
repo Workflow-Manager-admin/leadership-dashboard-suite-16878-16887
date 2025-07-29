@@ -13,10 +13,13 @@ function DataTable({ columns, data }) {
       <table style={{
         width: "100%",
         borderCollapse: "collapse",
-        margin: "10px 0 28px 0",
+        margin: "11px 0 28px 0",
         background: "var(--background-tertiary)",
-        borderRadius: 9,
-        border: "1px solid var(--border-color)"
+        borderRadius: 10,
+        border: "1.2px solid var(--border-color)",
+        fontFamily: "var(--font-main)",
+        fontSize: "1rem",
+        overflow: "hidden"
       }}>
         <thead>
           <tr>
@@ -24,11 +27,11 @@ function DataTable({ columns, data }) {
               <th key={col.key}
                 style={{
                   textAlign: "left",
-                  color: "var(--accent, #fee715)",
-                  padding: "10px 14px 6px 14px",
+                  color: "var(--accent)",
+                  padding: "12px 18px 7px 18px",
                   background: "var(--background-secondary)",
                   fontWeight: 700,
-                  fontSize: "1rem"
+                  fontSize: "1.03rem"
                 }}>{col.title}</th>
             )}
           </tr>
@@ -39,17 +42,17 @@ function DataTable({ columns, data }) {
               {columns.map(col => (
                 <td key={col.key}
                   style={{
-                    padding: "9px 14px",
-                    color: "var(--text-secondary,#e0e0e0)",
-                    fontSize: "0.99rem"
+                    padding: "10px 16px",
+                    color: "var(--text-secondary)",
+                    fontSize: "1rem"
                   }}>
-                  {row[col.key] !== undefined ? row[col.key] : <span style={{ color: "#777"}}>[?]</span>}
+                  {row[col.key] !== undefined ? row[col.key] : <span style={{ color: "#888"}}>[?]</span>}
                 </td>
               ))}
             </tr>
           )) : (
             <tr>
-              <td colSpan={columns.length} style={{ padding: "13px", color: "#888" }}>
+              <td colSpan={columns.length} style={{ padding: "16px", color: "#888", textAlign: "center" }}>
                  (No data)
               </td>
             </tr>
