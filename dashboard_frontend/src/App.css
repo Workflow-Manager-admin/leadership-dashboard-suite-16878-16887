@@ -42,6 +42,44 @@ body, .App {
   transition: background 0.25s, color 0.25s;
 }
 
+/* Sidebar Navigation */
+.sidebar-nav {
+  background: var(--background-tertiary);
+  border-right: 2.6px solid var(--border-color);
+  min-height: 100vh;
+  min-width: 210px;
+  z-index: 31;
+  box-shadow: 1.5px 0 14px 0 rgba(15,19,25,0.04);
+  position: fixed;
+  left: 0;
+  top: 0;
+  padding: 22px 0 0 0;
+}
+.sidebar-menuitem {
+  width: 100%;
+  text-align: left;
+  padding: 11px 34px 11px 28px;
+  font-weight: 600;
+  font-size: 1.06rem;
+  background: transparent;
+  color: var(--text-secondary);
+  border: none;
+  outline: none;
+  border-right: 4px solid transparent;
+  border-radius: 0;
+  cursor: pointer;
+  transition: background 0.19s, color 0.19s, border 0.19s;
+}
+.sidebar-menuitem-selected,
+.sidebar-menuitem:focus,
+.sidebar-menuitem:hover {
+  color: var(--accent);
+  background: var(--background-secondary);
+  border-right: 4px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  outline: none;
+}
+
 /* Top Navigation Bar */
 .topnav {
   width: 100%;
