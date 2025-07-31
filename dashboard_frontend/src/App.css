@@ -1,13 +1,13 @@
 :root {
-  --background: #23262b;
-  --background-secondary: #20222e;
-  --background-tertiary: #31334b;
-  --text-primary: #f7f8fa;
-  --text-secondary: #bfc7d5;
+  --background: #F5F7FA;
+  --background-secondary: #F5F7FA;
+  --background-tertiary: #F5F7FA;
+  --text-primary: #2E3A59;
+  --text-secondary: #0d0e0e;
   --border-color: #404356;
-  --primary-accent: #0a84ff;
-  --primary: #0057B8;
-  --accent: #FEE715;
+  --primary-accent: #123f6b;
+  --primary: #123f6b;
+  --accent: #0078D4;
   --input-bg: #181a25;
   --input-border: #45465a;
   --input-focus: #2684ff;
@@ -21,12 +21,12 @@
   --background: #f5f6f8;
   --background-secondary: #eaeef3;
   --background-tertiary: #fff;
-  --text-primary: #1b2432;
-  --text-secondary: #596377;
+  --text-primary: hsl(0, 0%, 4%);
+  --text-secondary: #050506;
   --border-color: #dae3e7;
   --primary-accent: #1060cf;
   --primary: #0057B8;
-  --accent: #FEE715;
+  --accent: #241a70;
   --input-bg: #fff;
   --input-border: #b2bac5;
   --input-focus: #1789fb;
@@ -59,7 +59,7 @@ body, .App {
   width: 100%;
   text-align: left;
   padding: 11px 34px 11px 28px;
-  font-weight: 600;
+  font-weight: 300;
   font-size: 1.06rem;
   background: transparent;
   color: var(--text-secondary);
@@ -75,7 +75,7 @@ body, .App {
 .sidebar-menuitem:hover {
   color: var(--accent);
   background: var(--background-secondary);
-  border-right: 4px solid var(--accent);
+  border-right: 6px solid var(--accent);
   border-radius: 0 8px 8px 0;
   outline: none;
 }
