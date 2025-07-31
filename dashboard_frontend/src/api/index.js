@@ -105,17 +105,82 @@ export async function classifyFile(data) {
   return post("/api/classification/tag", data);
 }
 
-// ----------- KPI Endpoints -----------
+/**
+ * PUBLIC_INTERFACE
+ * ----------- RULE MANAGEMENT (CRUD) ENDPOINTS -----------
+ */
 
 /**
  * PUBLIC_INTERFACE
- * Compute KPIs for a given parsed file.
- * @param {{ filename: string }} request
- * @returns {Promise<Object>} - KPIResult { kpis: {...} }
+ * List all classification/tagging rules.
+ * @returns {Promise<Array>} - Array of Rule objects
  */
-export async function computeKPIs(request) {
-  return post("/api/kpi/compute", request);
+export async function listRules() {
+  return get("/api/rules/");
 }
+
+/**
+ * PUBLIC_INTERFACE
+ * Create a new rule.
+ * @param {object} rule - Rule { name, pattern, action, ... }
+ * @returns {Promise<object>} - Created rule
+ */
+export async function createRule(rule) {
+  return post("/api/rules/", rule);
+}
+
+/**
+ * PUBLIC_INTERFACE
+ * Update a rule by rule_id.
+ * @param {string} rule_id
+ * @param {object} ruleData
+ * @returns {Promise<object>}
+ */
+export async function updateRule(rule_id, ruleData) {
+  return post(`/api/rules/${encodeURIComponent(rule_id)}`, ruleData);
+}
+
+/**
+ * PUBLIC_INTERFACE
+ * Delete a rule by ID.
+ * @param {string} rule_id
+ * @returns {Promise<object>}
+ */
+export async function deleteRule(rule_id) {
+  return post(`/api/rules/${encodeURIComponent(rule_id)}/delete`, {});
+}
+
+/**
+ * PUBLIC_INTERFACE
+ * Get all ingest/uploaded files for manual tagging/classification.
+ * @returns {Promise<Array>} - Array of { filename, tags/labels }
+ */
+export async function listFilesForTagging() {
+  return get("/api/classification/files");
+}
+
+/**
+ * PUBLIC_INTERFACE
+ * Get (view) tags for a file.
+ * @param {string} filename
+ * @returns {Promise<object>} - { filename, tags }
+ */
+export async function getFileTags(filename) {
+  return get(`/api/classification/tag?filename=${encodeURIComponent(filename)}`);
+}
+
+/**
+ * PUBLIC_INTERFACE
+ * Manually update tags/classification for a file.
+ * @param {{ filename: string, tags: string[] }} data
+ * @returns {Promise<object>}
+ */
+export async function setFileTags(data) {
+  // { filename, tags }
+  return post("/api/classification/tag", data);
+}
+
+// ----------- KPI Endpoints -----------
 
 // ----------- Dashboard Config Endpoints -----------
 

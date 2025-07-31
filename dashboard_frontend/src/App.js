@@ -7,6 +7,8 @@ import IngestionPage from "./pages/IngestionPage";
 import TemplatesPage from "./pages/TemplatesPage";
 import SettingsPage from "./pages/SettingsPage";
 import SchedulePage from "./pages/SchedulePage";
+import ManualTaggingPage from "./pages/ManualTaggingPage";
+import RuleManagementPage from "./pages/RuleManagementPage";
 
 // All menu items/sections for sidebar navigation
 // Keys: dashboard, mapping, tagging, rules, kpi, filters, templates, export, insights, scheduling, settings
@@ -50,9 +52,9 @@ function App() {
         // Folder Mapping falls under Ingestion/Data Config
         return <IngestionPage />;
       case "tagging":
-        return <div className="page-content"><h1 className="section-title">Manual Tagging</h1><p>[Stub: manual tag/classify interface]</p></div>;
+        return <ManualTaggingPage />;
       case "rules":
-        return <div className="page-content"><h1 className="section-title">Rule Definition</h1><p>[Stub: define rules to classify, extract or flag items]</p></div>;
+        return <RuleManagementPage />;
       case "kpi":
         return <div className="page-content"><h1 className="section-title">Custom KPI & Charts</h1><p>[Stub: custom KPI, chart, analytics management UI]</p></div>;
       case "filters":
