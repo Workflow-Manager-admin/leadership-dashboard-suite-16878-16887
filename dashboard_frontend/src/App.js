@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
-import TopBar from "./components/TopBar";
 import "./App.css";
 import DashboardPage from "./pages/DashboardPage";
 import IngestionPage from "./pages/IngestionPage";
@@ -9,9 +9,14 @@ import SettingsPage from "./pages/SettingsPage";
 import SchedulePage from "./pages/SchedulePage";
 import ManualTaggingPage from "./pages/ManualTaggingPage";
 import RuleManagementPage from "./pages/RuleManagementPage";
+import LoginPage from "./pages/auth/LoginPage";
+import RegisterPage from "./pages/auth/RegisterPage";
+import ProfilePage from "./pages/auth/ProfilePage";
+import AccountSettingsPage from "./pages/auth/AccountSettingsPage";
+import { AuthProvider, useAuth } from "./auth/AuthProvider";
+import ProtectedRoute from "./auth/ProtectedRoute";
 
 // All menu items/sections for sidebar navigation
-// Keys: dashboard, mapping, tagging, rules, kpi, filters, templates, export, insights, scheduling, settings
 const menuList = [
   { name: "Real-time Dashboard", key: "dashboard", icon: "📊" },
   { name: "Folder Mapping", key: "mapping", icon: "🗂️" },
@@ -23,68 +28,44 @@ const menuList = [
   { name: "Export", key: "export", icon: "⤓" },
   { name: "Insights", key: "insights", icon: "💡" },
   { name: "Scheduling", key: "scheduling", icon: "⏰" },
-  { name: "Settings", key: "settings", icon: "⚙️"}
+  { name: "Settings", key: "settings", icon: "⚙️"},
 ];
 
 /**
  * PUBLIC_INTERFACE
- * Main App — root: sidebar (left), main content (right), dark/light mode, section switching.
- * Connects each navigation menu to its page/component.
+ * Main App — handles router, theme, sidebar/menu selection, and top-level auth context.
  */
-function App() {
-  // Theme state: dark by default (persist with localStorage if desired)
+function AppShell() {
   const [theme, setTheme] = useState(() =>
     window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark"
   );
-
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
   }, [theme]);
-
   const [menu, setMenu] = useState("dashboard");
+  const navigate = useNavigate();
 
-  // Map section keys to UI pages/components (stubbed for not-yet-implemented ones)
-  function renderSection() {
-    switch (menu) {
-      case "dashboard":
-        return <DashboardPage />;
-      case "mapping":
-        // Folder Mapping falls under Ingestion/Data Config
-        return <IngestionPage />;
-      case "tagging":
-        return <ManualTaggingPage />;
-      case "rules":
-        return <RuleManagementPage />;
-      case "kpi":
-        return <div className="page-content"><h1 className="section-title">Custom KPI & Charts</h1><p>[Stub: custom KPI, chart, analytics management UI]</p></div>;
-      case "filters":
-        return <div className="page-content"><h1 className="section-title">Filters</h1><p>[Stub: configure dashboard filters — date, team, project]</p></div>;
-      case "templates":
-        return <TemplatesPage />;
-      case "export":
-        return <div className="page-content"><h1 className="section-title">Export</h1><p>[Stub: export dashboard as PDF, PPT, or HTML]</p></div>;
-      case "insights":
-        return <div className="page-content"><h1 className="section-title">Insights</h1><p>[Stub: summary insights, highlights, explanations]</p></div>;
-      case "scheduling":
-        return <SchedulePage />;
-      case "settings":
-        return <SettingsPage />;
-      default:
-        return <DashboardPage />;
+  // Changes sidebar menu, also navigates to correct route
+  function handleMenuSelect(key) {
+    setMenu(key);
+    // Map menu keys to paths
+    switch (key) {
+      case "dashboard": return navigate("/");
+      case "mapping": return navigate("/mapping");
+      case "tagging": return navigate("/tagging");
+      case "rules": return navigate("/rules");
+      case "templates": return navigate("/templates");
+      case "scheduling": return navigate("/scheduling");
+      case "settings": return navigate("/settings");
+      default: return navigate("/");
     }
   }
 
-  const toggleTheme = () =>
-    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  const toggleTheme = () => setTheme((prev) => (prev === "dark" ? "light" : "dark"));
 
-  // Responsive: sidebar + main
   return (
     <div className="App" style={{ display: "flex", minHeight: "100vh" }}>
-      <Sidebar
-        menus={menuList}
-        selected={menu}
-        onMenuSelect={setMenu}
-      />
+      <Sidebar menus={menuList} selected={menu} onMenuSelect={handleMenuSelect} />
       <div
         style={{
           flex: 1,
@@ -94,7 +75,6 @@ function App() {
           transition: "margin 0.2s"
         }}
       >
-        {/* TopBar removed; theme switch goes here */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", height: 60, borderBottom: "1px solid var(--border-color)", background: "var(--background-secondary)", paddingRight: 38, position: "sticky", top: 0, zIndex: 20 }}>
           <button
             className="btn"
@@ -132,10 +112,64 @@ function App() {
           </button>
         </div>
         <main className="main-panel" style={{ minHeight: "calc(100vh - 60px)" }}>
-          {renderSection()}
+          <Routes>
+            {/* Auth pages (no sidebar/protected routes) */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            {/* Protected routes */}
+            <Route
+              path="/"
+              element={<ProtectedRoute><DashboardPage /></ProtectedRoute>}
+            />
+            <Route
+              path="/mapping"
+              element={<ProtectedRoute><IngestionPage /></ProtectedRoute>}
+            />
+            <Route
+              path="/tagging"
+              element={<ProtectedRoute><ManualTaggingPage /></ProtectedRoute>}
+            />
+            <Route
+              path="/rules"
+              element={<ProtectedRoute><RuleManagementPage /></ProtectedRoute>}
+            />
+            <Route
+              path="/templates"
+              element={<ProtectedRoute><TemplatesPage /></ProtectedRoute>}
+            />
+            <Route
+              path="/scheduling"
+              element={<ProtectedRoute><SchedulePage /></ProtectedRoute>}
+            />
+            <Route
+              path="/settings"
+              element={<ProtectedRoute><SettingsPage /></ProtectedRoute>}
+            />
+            <Route
+              path="/profile"
+              element={<ProtectedRoute><ProfilePage /></ProtectedRoute>}
+            />
+            <Route
+              path="/account"
+              element={<ProtectedRoute><AccountSettingsPage /></ProtectedRoute>}
+            />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </main>
       </div>
     </div>
+  );
+}
+
+// App root, wraps with AuthProvider and Router
+function App() {
+  return (
+    <AuthProvider>
+      <Router>
+        <AppShell />
+      </Router>
+    </AuthProvider>
   );
 }
 

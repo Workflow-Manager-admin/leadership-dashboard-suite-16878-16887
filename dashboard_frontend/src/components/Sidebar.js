@@ -8,7 +8,12 @@ import React from "react";
  *   - selected: string (menu key)
  *   - onMenuSelect: (key: string) => void
  */
+import { useAuth } from "../auth/AuthProvider";
+import { Link, useNavigate } from "react-router-dom";
+
 function Sidebar({ menus, selected, onMenuSelect }) {
+  const { isAuthenticated, user, logout } = useAuth();
+  const navigate = useNavigate();
   return (
     <aside
       className="sidebar-nav"
@@ -100,8 +105,34 @@ function Sidebar({ menus, selected, onMenuSelect }) {
           ))}
         </ul>
       </nav>
-      <div style={{ marginTop: "auto", marginBottom: 24, marginLeft: 28, fontSize: 13, color: "var(--text-secondary)" }}>
-        <span role="img" aria-label="settings">⚙️</span> <span style={{fontWeight:500}}>Settings</span>
+      <div style={{ marginTop: "auto", marginBottom: 24, marginLeft: 28, fontSize: 13, color: "var(--text-secondary)", display: "flex", flexDirection: "column", gap: 7 }}>
+        {isAuthenticated && isAuthenticated() ? (
+          <>
+            <div>
+              <span role="img" aria-label="profile">👤</span>{" "}
+              <Link to="/profile" style={{ color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}>{user?.username || user?.sub || "Profile"}</Link>
+            </div>
+            <div>
+              <button
+                className="btn"
+                style={{ fontSize: 13, padding: "4px 16px", background: "#eee", color: "#222" }}
+                onClick={() => {
+                  logout();
+                  navigate("/login");
+                }}
+              >
+                Log Out
+              </button>
+            </div>
+            <div>
+              <Link to="/account" style={{ color: "#888", fontSize: 12 }}>Account Settings</Link>
+            </div>
+          </>
+        ) : (
+          <>
+            <Link to="/login" style={{ color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}>Sign In</Link>
+          </>
+        )}
       </div>
     </aside>
   );
