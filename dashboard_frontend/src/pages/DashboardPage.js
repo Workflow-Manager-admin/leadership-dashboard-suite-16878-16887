@@ -11,6 +11,7 @@ import InfoCard from "../components/InfoCard";
 import ConfigForm from "../components/ConfigForm";
 import useWebSocket from "../api/useWebSocket";
 import Modal from "../components/Modal";
+import ExportDashboard from "../components/ExportDashboard";
 
 /**
  * PUBLIC_INTERFACE
@@ -357,6 +358,8 @@ function DashboardPage() {
 
   // Active dashboard dropdown selector
   function renderDashboardSelector() {
+    // Find the active dashboard title for display/exports
+    const activeD = (dashboards || []).find(d => d.dashboard_id === activeDashboardId);
     return (
       <div style={{ display: "flex", alignItems: "center", gap: 16, margin: "10px 0 18px 0" }}>
         <label style={{ fontWeight: 500, color: "var(--accent)" }}>
@@ -374,6 +377,10 @@ function DashboardPage() {
         <button className="btn" style={{ fontSize: 13, padding: "6px 18px" }} onClick={openConfigModal}>
           ⋯ Customize KPIs/Charts
         </button>
+        <ExportDashboard
+          dashboardId={activeDashboardId}
+          dashboardTitle={activeD ? activeD.title : undefined}
+        />
       </div>
     );
   }
