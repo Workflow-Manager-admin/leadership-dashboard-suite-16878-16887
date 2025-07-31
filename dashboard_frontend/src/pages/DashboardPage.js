@@ -1,96 +1,234 @@
 import React, { useEffect, useState, useCallback } from "react";
-import { listDashboardConfigs, saveDashboardConfig } from "../api";
+import {
+  listDashboardConfigs,
+  saveDashboardConfig,
+  getDashboardConfig,
+} from "../api";
 import DashboardWidget from "../components/DashboardWidget";
 import ChartWidget from "../components/ChartWidget";
 import DataTable from "../components/DataTable";
 import InfoCard from "../components/InfoCard";
 import ConfigForm from "../components/ConfigForm";
 import useWebSocket from "../api/useWebSocket";
+import Modal from "../components/Modal";
 
 /**
  * PUBLIC_INTERFACE
  * DashboardPage shows the main leadership dashboard, KPIs and key metrics.
- * Fetches dashboard config summaries from backend.
- * Allows creation of new dashboards.
+ * Now allows end-users to interactively select/configure KPIs/charts/filters.
+ * Fetches dashboard config summaries from backend. 
+ * Allows creation and editing of dashboards, configuration of which KPIs/charts/filters are visible,
+ * and applies filters with live backend integration.
  */
 function DashboardPage() {
   const [dashboards, setDashboards] = useState([]);
+  const [activeDashboardId, setActiveDashboardId] = useState(null);
+  const [selectedDashboardConfig, setSelectedDashboardConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Live KPI/metrics state (auto-updated from stream)
-  const [liveKPIs, setLiveKPIs] = useState({
-    totalReports: "-",
-    topPerfScore: "-",
-    updated: "-",
-    raw: null,
-  });
+  const [liveKPIs, setLiveKPIs] = useState({});
   // Live trend data (for chart area)
   const [trendData, setTrendData] = useState([]);
 
-  // Dashboard creation state
+  // Filter state (date/project/team choices)
+  const [filters, setFilters] = useState({
+    date: "",
+    project: "",
+    team: "",
+  });
+
+  // UI modal state for KPI/chart selection/config
+  const [configModalOpen, setConfigModalOpen] = useState(false);
+
+  // Configuration of selected KPIs/charts to display (user configurable)
+  const [kpiChartConfig, setKpiChartConfig] = useState({
+    kpis: ["totalReports", "topPerfScore", "updated"],
+    charts: ["kpi_trend"],
+    filtersEnabled: ["date", "project", "team"],
+  });
+
   const [formFields, setFormFields] = useState({
     dashboard_id: "",
     title: "",
-    // config: {}
   });
   const [creating, setCreating] = useState(false);
   const [createMsg, setCreateMsg] = useState(null);
+  const [saveConfigMsg, setSaveConfigMsg] = useState(null);
+
+  // For filter dropdown state
+  const [projects, setProjects] = useState([]);
+  const [teams, setTeams] = useState([]);
 
   // Backend WebSocket URL (enable env override for local/dev/prod)
-  // Try to match the backend port; default to ws://localhost:3001/ws/stream (customize as needed)
   const WS_URL = process.env.REACT_APP_WS_URL || "ws://localhost:3001/ws/stream";
 
-  // WebSocket: handle incoming stream messages and update dashboard metrics/reactive state.
+  // WebSocket: handle incoming stream messages and update states
   const handleMessage = useCallback((msg) => {
-    // msg can be { kpis: {...}, trends: [...], dashboards: [...] }
-    // Defensive: support both backend format and stub
+    // msg format example: { kpis: {...}, trends: [...], dashboards: [...], projects: [...], teams: [...] }
     if (msg && typeof msg === "object") {
       if (msg.kpis) {
-        setLiveKPIs(kpis => ({
-          ...kpis,
+        setLiveKPIs(current => ({
+          ...current,
           ...msg.kpis,
           raw: { ...msg.kpis },
         }));
       }
-      if (msg.trends) {
-        setTrendData(msg.trends);
-      }
-      if (msg.dashboards) {
-        setDashboards(msg.dashboards);
-      }
+      if (msg.trends) setTrendData(msg.trends);
+      if (msg.dashboards) setDashboards(msg.dashboards);
+      if (msg.projects) setProjects(msg.projects);
+      if (msg.teams) setTeams(msg.teams);
     }
   }, []);
 
-  const { connected: wsConnected, error: wsError } = useWebSocket(WS_URL, handleMessage, { retryIntervalMs: 4500 });
+  const { connected: wsConnected, error: wsError } = useWebSocket(
+    WS_URL, handleMessage, { retryIntervalMs: 4500 }
+  );
 
-  // Fallback/initial fetch (REST)
+  // Initial dashboard list fetch + populate filter/project/team fields
   function fetchDashboards() {
     setLoading(true);
     setError(null);
     listDashboardConfigs()
-      .then(setDashboards)
+      .then(data => {
+        setDashboards(data);
+        if (!activeDashboardId && data.length > 0) {
+          setActiveDashboardId(data[0].dashboard_id);
+        }
+      })
       .catch((e) => setError(e?.message || "Error loading dashboards"))
       .finally(() => setLoading(false));
   }
 
-  useEffect(() => {
-    fetchDashboards();
-  }, []);
+  // Dashboard config fetch
+  async function fetchDashboardConfig(id) {
+    setSelectedDashboardConfig(null);
+    if (!id) return;
+    try {
+      // config includes KPIs, chart selection, filters, etc.
+      const configRes = await getDashboardConfig(id);
+      setSelectedDashboardConfig(configRes.config || {});
+      if (configRes.config && configRes.config.kpiChartConfig) {
+        setKpiChartConfig(configRes.config.kpiChartConfig);
+      } else {
+        setKpiChartConfig({
+          kpis: ["totalReports", "topPerfScore", "updated"],
+          charts: ["kpi_trend"],
+          filtersEnabled: ["date", "project", "team"],
+        });
+      }
+    } catch {
+      setSelectedDashboardConfig({});
+      setKpiChartConfig({
+        kpis: ["totalReports", "topPerfScore", "updated"],
+        charts: ["kpi_trend"],
+        filtersEnabled: ["date", "project", "team"],
+      });
+    }
+  }
 
-  // KPIs with live override if present
-  const kpisToDisplay = [
-    { label: "Total Reports", value: liveKPIs?.totalReports ?? dashboards?.length ?? "-" },
-    { label: "Top Perf. Score", value: liveKPIs?.topPerfScore ?? (dashboards && dashboards.length > 0 ? "95" : "-") },
-    { label: "Updated", value: liveKPIs?.updated ?? "Today" }
+  // On mount: fetch dashboards and prime display
+  useEffect(() => { fetchDashboards(); }, []);
+  useEffect(() => { 
+    if (activeDashboardId) fetchDashboardConfig(activeDashboardId);
+  }, [activeDashboardId]);
+
+  // KPIs that are selectable/configurable (example set; expand as needed)
+  const allKpis = [
+    { key: "totalReports", label: "Total Reports" },
+    { key: "topPerfScore", label: "Top Perf. Score" },
+    { key: "updated", label: "Updated" },
+    { key: "avgQuality", label: "Avg Quality" },
+    { key: "openProjects", label: "Open Projects" },
+    { key: "completionRate", label: "Completion Rate" },
+  ];
+  const kpiMap = Object.fromEntries(allKpis.map(k => [k.key, k.label]));
+
+  // Charts that are selectable/configurable (stubs for now)
+  const allCharts = [
+    { key: "kpi_trend", label: "KPI Trends" },
+    { key: "quality_distribution", label: "Quality Distribution" },
+    { key: "performance_rank", label: "Performance Rank" },
   ];
 
-  // Handle form field changes for dashboard creation
+  // Filters that can be toggled
+  const filterMeta = [
+    { key: "date", label: "Date" },
+    { key: "project", label: "Project" },
+    { key: "team", label: "Team" },
+  ];
+
+  // Apply filter change
+  function handleFilterChange(ev) {
+    const { name, value } = ev.target;
+    setFilters(f => ({ ...f, [name]: value }));
+    // With backend, can apply filter to API or via WebSocket/query
+    // Optionally broadcast filter state via WebSocket or REST here.
+    // (Stub: UI only - for full integration, backend API should accept filter params)
+  }
+
+  // Open KPI/chart config modal
+  function openConfigModal() { setConfigModalOpen(true); }
+  function closeConfigModal() { setConfigModalOpen(false); setSaveConfigMsg(null); }
+
+  function handleKpiConfigChange(ev) {
+    const { name, value, checked, type } = ev.target;
+    // Multi-checkbox handler for kpis, charts, filtersEnabled
+    setKpiChartConfig((conf) => {
+      if (type === "checkbox") {
+        if (name.startsWith("kpi_")) {
+          const k = name.replace("kpi_", "");
+          return { ...conf, kpis: checked
+            ? [...(conf.kpis||[]), k]
+            : (conf.kpis||[]).filter(v => v !== k)
+          };
+        }
+        if (name.startsWith("chart_")) {
+          const c = name.replace("chart_", "");
+          return { ...conf, charts: checked
+            ? [...(conf.charts||[]), c]
+            : (conf.charts||[]).filter(v => v !== c)
+          };
+        }
+        if (name.startsWith("filter_")) {
+          const f = name.replace("filter_", "");
+          return { ...conf, filtersEnabled: checked
+            ? [...(conf.filtersEnabled||[]), f]
+            : (conf.filtersEnabled||[]).filter(val => val !== f)
+          };
+        }
+      }
+      return conf;
+    });
+  }
+
+  async function handleSaveKpiChartConfig(ev) {
+    ev.preventDefault();
+    setSaveConfigMsg(null);
+    if (!activeDashboardId) {
+      setSaveConfigMsg({ type: "error", msg: "No active dashboard" });
+      return;
+    }
+    try {
+      await saveDashboardConfig({
+        dashboard_id: activeDashboardId,
+        config: {
+          ...(selectedDashboardConfig || {}),
+          kpiChartConfig
+        }
+      });
+      setSaveConfigMsg({ type: "success", msg: "Configuration saved!" });
+      setTimeout(() => setConfigModalOpen(false), 700);
+    } catch (e) {
+      setSaveConfigMsg({ type: "error", msg: e?.message || "Failed to save config" });
+    }
+  }
+
+  // Dashboard creation form handlers
   function handleFieldChange(name, value) {
     setFormFields(f => ({ ...f, [name]: value }));
   }
-
-  // Create a new dashboard config (minimal stub config)
   async function handleCreateDashboard(e) {
     e.preventDefault();
     if (!formFields.dashboard_id || !formFields.title) {
@@ -100,7 +238,6 @@ function DashboardPage() {
     setCreating(true);
     setCreateMsg(null);
     try {
-      // config can be expanded; currently save minimal
       await saveDashboardConfig({
         dashboard_id: formFields.dashboard_id,
         config: { title: formFields.title }
@@ -115,33 +252,129 @@ function DashboardPage() {
     }
   }
 
-  // Dummy chart if no trend data available yet
-  function renderTrendChart() {
-    if (trendData && trendData.length > 0) {
-      // Render a basic visual trend line (as SVG or fallback). For now, simple text.
-      return (
-        <div style={{
-          padding: 6,
-          color: "var(--primary-accent)",
-          fontWeight: 600,
-          minHeight: 70,
-        }}>
-          [Trends: {trendData.map((v, i) => (
-            <span key={i} style={{ margin: "0 6px", display: "inline-block", fontSize: 16 }}>{v}</span>
-          ))}]
-        </div>
-      );
-    }
-    // fallback stub
+  // Render KPI widgets according to config
+  function renderKpis() {
+    return (kpiChartConfig.kpis || []).map(kpi =>
+      <DashboardWidget key={kpi} title={kpiMap[kpi] || kpi}>
+        <span style={{ fontSize: 32, fontWeight: 700, color: "var(--accent, #fee715)" }}>
+          {liveKPIs?.[kpi] ?? "-"}
+        </span>
+      </DashboardWidget>
+    );
+  }
+
+  // Chart area widget(s) based on user config
+  function renderDynamicCharts() {
+    return (kpiChartConfig.charts || []).map(chartKey => (
+      <ChartWidget key={chartKey} title={allCharts.find(c => c.key === chartKey)?.label || chartKey}>
+        {/* Switch chart type according to chartKey, fallback to stub */}
+        {chartKey === "kpi_trend"
+          ? (trendData && trendData.length > 0
+            ? <div style={{
+                padding: 6,
+                color: "var(--primary-accent)",
+                fontWeight: 600,
+                minHeight: 70,
+              }}>
+                [Trends: {trendData.map((v, i) => (
+                  <span key={i} style={{ margin: "0 6px", display: "inline-block", fontSize: 16 }}>{v}</span>
+                ))}]
+              </div>
+            : <div style={{
+                width: "100%",
+                height: 120,
+                background: "linear-gradient(90deg,#292,#393 45%,#226)",
+                borderRadius: 8,
+                opacity: 0.3,
+                margin: "8px 0"
+              }}>[Chart visualization stub]</div>
+          )
+          : <div style={{ color: "#666", fontStyle: "italic" }}>[{chartKey} chart stub]</div>
+        }
+      </ChartWidget>
+    ));
+  }
+
+  function renderFilterControls() {
     return (
-      <div style={{
-        width: "100%",
-        height: 120,
-        background: "linear-gradient(90deg,#292,#393 45%,#226)",
-        borderRadius: 8,
-        opacity: 0.3,
-        margin: "8px 0"
-      }}>[Chart visualization stub]</div>
+      <form style={{ display: "flex", gap: 20, margin: "12px 0 18px 0", flexWrap: "wrap" }}>
+        {filterMeta.filter(fm => (kpiChartConfig.filtersEnabled||[]).includes(fm.key)).map(fm => {
+          if (fm.key === "date") {
+            return (
+              <label key="date" style={{ fontWeight: 500, color: "var(--accent)", fontSize: 15 }}>
+                Date:
+                <input
+                  name="date"
+                  type="date"
+                  value={filters.date}
+                  onChange={handleFilterChange}
+                  style={{ marginLeft: 10, fontWeight: "normal" }}
+                />
+              </label>
+            );
+          }
+          if (fm.key === "project") {
+            return (
+              <label key="project" style={{ fontWeight: 500, color: "var(--accent)", fontSize: 15 }}>
+                Project:
+                <select
+                  name="project"
+                  value={filters.project}
+                  onChange={handleFilterChange}
+                  style={{ marginLeft: 10, fontWeight: "normal" }}
+                >
+                  <option value="">[Any]</option>
+                  {projects.map(proj =>
+                    <option key={proj} value={proj}>{proj}</option>
+                  )}
+                </select>
+              </label>
+            );
+          }
+          if (fm.key === "team") {
+            return (
+              <label key="team" style={{ fontWeight: 500, color: "var(--accent)", fontSize: 15 }}>
+                Team:
+                <select
+                  name="team"
+                  value={filters.team}
+                  onChange={handleFilterChange}
+                  style={{ marginLeft: 10, fontWeight: "normal" }}
+                >
+                  <option value="">[Any]</option>
+                  {teams.map(team =>
+                    <option key={team} value={team}>{team}</option>
+                  )}
+                </select>
+              </label>
+            );
+          }
+          return null;
+        })}
+      </form>
+    );
+  }
+
+  // Active dashboard dropdown selector
+  function renderDashboardSelector() {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: 16, margin: "10px 0 18px 0" }}>
+        <label style={{ fontWeight: 500, color: "var(--accent)" }}>
+          Dashboard:
+          <select
+            value={activeDashboardId || ""}
+            onChange={e => setActiveDashboardId(e.target.value)}
+            style={{ marginLeft: 8, fontWeight: "normal" }}
+          >
+            {(dashboards || []).map(d => (
+              <option key={d.dashboard_id} value={d.dashboard_id}>{d.title || d.dashboard_id}</option>
+            ))}
+          </select>
+        </label>
+        <button className="btn" style={{ fontSize: 13, padding: "6px 18px" }} onClick={openConfigModal}>
+          ⋯ Customize KPIs/Charts
+        </button>
+      </div>
     );
   }
 
@@ -179,16 +412,17 @@ function DashboardPage() {
       {wsError && (
         <div style={{ color: "red", marginBottom: 8 }}>WebSocket error: {wsError}</div>
       )}
+
+      {/* Dashboard selector + config modal button, if multiple dashboards are available */}
+      {dashboards.length > 0 && renderDashboardSelector()}
+
+      {/* Filter bar (date, project, team) */}
+      {renderFilterControls()}
+
       <div style={{ display: "flex", gap: 36, flexWrap: "wrap", margin: "0 0 26px 0" }}>
-        {kpisToDisplay.map(kpi =>
-          <DashboardWidget key={kpi.label} title={kpi.label}>
-            <span style={{ fontSize: 32, fontWeight: 700, color: "var(--accent, #fee715)" }}>{kpi.value}</span>
-          </DashboardWidget>
-        )}
+        {renderKpis()}
       </div>
-      <ChartWidget title="KPI Trends">
-        {renderTrendChart()}
-      </ChartWidget>
+      {renderDynamicCharts()}
       <InfoCard
         title="Available Dashboards"
         description="Shows list of configured dashboards for SLT."
@@ -234,6 +468,71 @@ function DashboardPage() {
           </div>
         )}
       </InfoCard>
+
+      {/* Modal: select which KPIs/charts/filters to display */}
+      <Modal isOpen={configModalOpen} onClose={closeConfigModal} title="Configure KPIs, Charts, and Filters">
+        <form onSubmit={handleSaveKpiChartConfig} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+          <div style={{ marginBottom: 5 }}>
+            <strong>KPIs:</strong>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginTop: 5 }}>
+              {allKpis.map(k =>
+                <label key={k.key} style={{ fontWeight: 400, color: "var(--primary-accent)", fontSize: 14 }}>
+                  <input
+                    type="checkbox"
+                    checked={(kpiChartConfig.kpis || []).includes(k.key)}
+                    onChange={handleKpiConfigChange}
+                    name={`kpi_${k.key}`}
+                    style={{ marginRight: 4 }}
+                  />{k.label}
+                </label>
+              )}
+            </div>
+          </div>
+          <div style={{ marginBottom: 5 }}>
+            <strong>Charts:</strong>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginTop: 5 }}>
+              {allCharts.map(c =>
+                <label key={c.key} style={{ fontWeight: 400, color: "var(--primary-accent)", fontSize: 14 }}>
+                  <input
+                    type="checkbox"
+                    checked={(kpiChartConfig.charts || []).includes(c.key)}
+                    onChange={handleKpiConfigChange}
+                    name={`chart_${c.key}`}
+                    style={{ marginRight: 4 }}
+                  />{c.label}
+                </label>
+              )}
+            </div>
+          </div>
+          <div style={{ marginBottom: 6 }}>
+            <strong>Filters:</strong>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginTop: 5 }}>
+              {filterMeta.map(f =>
+                <label key={f.key} style={{ fontWeight: 400, color: "var(--primary-accent)", fontSize: 14 }}>
+                  <input
+                    type="checkbox"
+                    checked={(kpiChartConfig.filtersEnabled || []).includes(f.key)}
+                    onChange={handleKpiConfigChange}
+                    name={`filter_${f.key}`}
+                    style={{ marginRight: 4 }}
+                  />{f.label}
+                </label>
+              )}
+            </div>
+          </div>
+          <div style={{ display: "flex", gap: 16, alignItems: "center", marginTop: 14 }}>
+            <button className="btn" type="submit">Save Configuration</button>
+            <button className="btn" type="button" style={{ background: "#aaa", color: "#111" }} onClick={closeConfigModal}>Cancel</button>
+            {saveConfigMsg && (
+              <span style={{
+                color: saveConfigMsg.type === "error" ? "red" : "#15a305",
+                fontSize: 14,
+                fontWeight: 600
+              }}>{saveConfigMsg.msg}</span>
+            )}
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
