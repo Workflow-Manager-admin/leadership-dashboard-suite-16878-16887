@@ -12,6 +12,8 @@ import ConfigForm from "../components/ConfigForm";
 import useWebSocket from "../api/useWebSocket";
 import Modal from "../components/Modal";
 import ExportDashboard from "../components/ExportDashboard";
+import { getDashboardInsights } from "../api";
+import DashboardInsightsCard from "../components/DashboardInsightsCard";
 
 /**
  * PUBLIC_INTERFACE
@@ -27,6 +29,15 @@ function DashboardPage() {
   const [selectedDashboardConfig, setSelectedDashboardConfig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Insights summary/highlight API state
+  const [dashboardInsights, setDashboardInsights] = useState({
+    highlights: [],
+    summary_stats: {},
+    banners: []
+  });
+  const [insightsLoading, setInsightsLoading] = useState(false);
+  const [insightsError, setInsightsError] = useState(null);
 
   // Live KPI/metrics state (auto-updated from stream)
   const [liveKPIs, setLiveKPIs] = useState({});
@@ -134,6 +145,22 @@ function DashboardPage() {
   useEffect(() => { 
     if (activeDashboardId) fetchDashboardConfig(activeDashboardId);
   }, [activeDashboardId]);
+
+  // Fetch dashboard insights API on mount (or on dashboard change, later if API supports filtering)
+  useEffect(() => {
+    setInsightsLoading(true);
+    setInsightsError(null);
+    getDashboardInsights()
+      .then((ins) =>
+        setDashboardInsights({
+          highlights: ins.highlights || [],
+          summary_stats: ins.summary_stats || {},
+          banners: ins.banners || [],
+        })
+      )
+      .catch(e => setInsightsError(e?.message || "Could not load insights"))
+      .finally(() => setInsightsLoading(false));
+  }, []);
 
   // KPIs that are selectable/configurable (example set; expand as needed)
   const allKpis = [
@@ -419,7 +446,19 @@ function DashboardPage() {
       {wsError && (
         <div style={{ color: "red", marginBottom: 8 }}>WebSocket error: {wsError}</div>
       )}
-
+      {/* Insights summary/highlights card (top of dashboard) */}
+      <div style={{ margin: "9px 0 22px 0" }}>
+        {insightsLoading
+          ? <div style={{ color: "#556", margin: "8px 0", fontWeight: 600 }}>Loading insights...</div>
+          : insightsError
+              ? <div style={{ color: "red", fontWeight: 600, marginBottom: 9 }}>Error loading insights: {insightsError}</div>
+              : <DashboardInsightsCard
+                  highlights={dashboardInsights.highlights}
+                  summaryStats={dashboardInsights.summary_stats}
+                  banners={dashboardInsights.banners}
+                />
+        }
+      </div>
       {/* Dashboard selector + config modal button, if multiple dashboards are available */}
       {dashboards.length > 0 && renderDashboardSelector()}
 

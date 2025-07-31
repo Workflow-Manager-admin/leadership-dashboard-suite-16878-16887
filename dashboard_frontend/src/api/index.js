@@ -180,6 +180,15 @@ export async function setFileTags(data) {
   return post("/api/classification/tag", data);
 }
 
+/**
+ * PUBLIC_INTERFACE
+ * Get insights, summaries, and highlights for dashboard display.
+ * @returns {Promise<Object>} - { highlights, summary_stats, banners, ... }
+ */
+export async function getDashboardInsights() {
+  return get("/api/dashboard/insights");
+}
+
 // ----------- KPI Endpoints -----------
 
 // ----------- Dashboard Config Endpoints -----------
