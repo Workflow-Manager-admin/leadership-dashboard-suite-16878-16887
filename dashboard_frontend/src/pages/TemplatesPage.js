@@ -1,64 +1,24 @@
-import React, { useEffect, useState } from "react";
-import { listTemplates, createTemplate } from "../api";
-import DataTable from "../components/DataTable";
+import React, { useState } from "react";
 import InfoCard from "../components/InfoCard";
-import ConfigForm from "../components/ConfigForm";
+import TemplateManager from "../components/TemplateManager";
 
 /**
  * PUBLIC_INTERFACE
  * TemplatesPage handles dashboard template creation and management.
- * Fetches list of templates from backend and displays them.
+ * Integrates a modal for creation and edit, and supports applying templates.
  */
 function TemplatesPage() {
-  const [templates, setTemplates] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [tplFields, setTplFields] = useState({
-    name: "",
-    template_id: ""
-  });
-  const [creating, setCreating] = useState(false);
-  const [createMsg, setCreateMsg] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [reuseMsg, setReuseMsg] = useState(null);
 
-  function fetchTemplates() {
-    setLoading(true);
-    setError(null);
-    listTemplates()
-      .then((data) => setTemplates(data))
-      .catch((e) => setError(e?.message || "Error loading templates"))
-      .finally(() => setLoading(false));
-  }
-
-  useEffect(() => {
-    fetchTemplates();
-  }, []);
-
-  function handleTplChange(name, value) {
-    setTplFields(f => ({ ...f, [name]: value }));
-  }
-
-  async function handleTplCreate(e) {
-    e.preventDefault();
-    if (!tplFields.name || !tplFields.template_id) {
-      setCreateMsg({ type: "error", msg: "Both Name and Template ID required" });
-      return;
-    }
-    setCreating(true);
-    setCreateMsg(null);
-    try {
-      await createTemplate({
-        name: tplFields.name,
-        template_id: tplFields.template_id,
-        config: {} // minimal, can extend with fields for richer templates
-      });
-      setCreateMsg({ type: "success", msg: "Template created!"});
-      setTplFields({ name: "", template_id: "" });
-      fetchTemplates();
-    } catch (e) {
-      setCreateMsg({ type: "error", msg: e?.message || "Failed to create" });
-    } finally {
-      setCreating(false);
-    }
+  // Called when "Apply" is clicked in TemplateManager component
+  function handleApplyTemplate(template) {
+    setReuseMsg({
+      type: "success",
+      msg: `Template "${template.name || template.template_id}" selected. [Integrate this logic with dashboard apply API.]`
+    });
+    setModalOpen(false);
+    // Optionally: integrate actual dashboard update logic here or redirect user to dashboard config.
   }
 
   return (
@@ -68,46 +28,37 @@ function TemplatesPage() {
         Dashboards can be saved, managed, or reused as templates.
       </div>
       <InfoCard
-        title="Template Library"
-        description="Shows all dashboard templates (saved, reusable configs)."
+        title="Template Management"
+        description="Use templates to reuse dashboard layouts, KPIs, and chart configs. Edit and apply templates via the library below."
       >
-        {loading && <div>Loading templates...</div>}
-        {error && <div style={{ color: "red" }}>Error: {error}</div>}
-        {!loading && !error && (
-          <DataTable
-            columns={[
-              { title: "Name", key: "name" },
-              { title: "Template ID", key: "template_id" }
-            ]}
-            data={templates}
-          />
-        )}
-      </InfoCard>
-      <InfoCard
-        title="Create Template"
-        description="Create a new dashboard template for reuse."
-      >
-        <ConfigForm
-          fields={[
-            { label: "Name", name: "name", value: tplFields.name, type: "text" },
-            { label: "Template ID", name: "template_id", value: tplFields.template_id, type: "text" }
-          ]}
-          onChange={handleTplChange}
-          onSubmit={handleTplCreate}
-          submitLabel={creating ? "Creating..." : "Create Template"}
-          disabled={creating}
+        <button
+          className="btn"
+          style={{ fontSize: 15, marginBottom: 9 }}
+          onClick={() => setModalOpen(true)}
+        >
+          Open Template Library
+        </button>
+        <span style={{ color: "#888", marginLeft: 10, fontSize: 13 }}>
+          View, create, edit, and apply dashboard templates.
+        </span>
+        <TemplateManager
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSelect={handleApplyTemplate}
         />
-        {createMsg && (
+        {reuseMsg && (
           <div style={{
-            color: createMsg.type === "error" ? "red" : "#08a408",
-            fontSize: 15, margin: "7px 0 0 2px"
+            color: reuseMsg.type === "error" ? "red" : "#08a408",
+            fontWeight: 600,
+            marginTop: 15,
+            fontSize: 15
           }}>
-            {createMsg.msg}
+            {reuseMsg.msg}
           </div>
         )}
       </InfoCard>
       <p style={{ color: "#777" }}>
-        Download, manage, and reuse dashboard templates.
+        Download, manage, and reuse dashboard templates for fast dashboard config.
       </p>
     </div>
   );
