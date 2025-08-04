@@ -56,6 +56,7 @@ function Folders() {
   // File upload handlers
   function handleFileChange(e) {
     setUploadFile(e.target.files[0] || null);
+    // Always reset status and error *on every file selection*
     setUploadStatus("");
     setUploadError("");
   }
@@ -71,16 +72,20 @@ function Folders() {
     setUploadStatus("uploading");
     try {
       const result = await apiFileUpload("/files/upload", uploadFile);
-      setUploadStatus("done");
-      setUploadError("");
-      // Optionally, show status returned from backend (success, detected_type, etc.)
+      // Show clear success message
       setUploadStatus(`Upload successful! (${result.file_name}, type: ${result.detected_type}, status: ${result.status})`);
-      setUploadFile(null);
+      setUploadError("");
+      setUploadFile(null); // Reset after upload, so <input> is cleared
+      // Also, clear the file input's value so user can upload the same file again if desired
+      if (e.target && e.target.elements && e.target.elements[0]) e.target.elements[0].value = "";
       // Refresh file list after successful upload
       setRefresh(v => v+1);
     } catch (err) {
       setUploadError("Upload failed: " + (err.message || "Unknown error"));
       setUploadStatus("error");
+      // Clear file input so user can try again
+      setUploadFile(null);
+      if (e.target && e.target.elements && e.target.elements[0]) e.target.elements[0].value = "";
     }
   }
 
