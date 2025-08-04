@@ -14,11 +14,21 @@ function Folders() {
 
   function handleCreate(e) {
     e.preventDefault();
-    apiPost("/folders/", form).then(() => {
-      setForm({ folder_path: "", mapping_type: "local", meta: {} });
-      setCreating(false);
-      setRefresh(v => v+1);
-    });
+    // Formulate payload strictly per FolderMapping API
+    let { folder_path, mapping_type, meta, ...maybeExtras } = form;
+    // Remove folder_id if present, only send required keys (do not send undefined/empty meta)
+    let payload = { folder_path, mapping_type };
+    if (meta && Object.keys(meta).length > 0) payload.meta = meta;
+    apiPost("/folders/", payload)
+      .then(() => {
+        setForm({ folder_path: "", mapping_type: "local", meta: {} });
+        setCreating(false);
+        setRefresh(v => v+1);
+      })
+      .catch(error => {
+        // Friendly error display
+        alert("Failed to create folder mapping: " + error.message);
+      });
   }
 
   function handleDelete(fid) {

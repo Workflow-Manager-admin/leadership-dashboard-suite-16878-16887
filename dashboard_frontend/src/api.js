@@ -15,7 +15,11 @@ export async function apiGet(path, params = {}) {
     return resp.json();
 }
 
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * Make POST request to backend API.
+ * Now returns error JSON (if any) on failure for better error handling.
+ */
 export async function apiPost(path, body = {}, contentType = "application/json") {
     let url = API_BASE + path;
     let init = {
@@ -24,8 +28,24 @@ export async function apiPost(path, body = {}, contentType = "application/json")
         body: contentType === "application/json" ? JSON.stringify(body) : body
     };
     const resp = await fetch(url, init);
-    if (!resp.ok) throw new Error(`Failed to POST ${url}, status=${resp.status}`);
-    return resp.json();
+    let responseText = await resp.text();
+    let data;
+    try {
+        data = JSON.parse(responseText);
+    } catch (e) {
+        data = responseText;
+    }
+    if (!resp.ok) {
+        // Error details may be available in the response body
+        let errorMsg = `Failed to POST ${url}, status=${resp.status}`;
+        if (data && typeof data === 'object' && data.detail) {
+            errorMsg += ": " + JSON.stringify(data.detail);
+        } else if (typeof data === 'string' && data.length < 1000) {
+            errorMsg += ": " + data;
+        }
+        throw new Error(errorMsg);
+    }
+    return data;
 }
 
 // PUBLIC_INTERFACE
