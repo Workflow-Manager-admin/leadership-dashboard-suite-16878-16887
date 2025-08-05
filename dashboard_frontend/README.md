@@ -8,6 +8,27 @@ This project provides a minimal React template with a clean, modern UI and minim
 - **Modern UI**: Clean, responsive design with KAVIA brand styling
 - **Fast**: Minimal dependencies for quick loading times
 - **Simple**: Easy to understand and modify
+## Environment Configuration
+
+### Setting Environment Variables
+
+- To configure backend API URLs or advanced settings, use a `.env` file in the **root of this folder** (next to `package.json`).
+- File must be named exactly `.env` (no extension).
+- Any variable you wish to use in code must be prefixed with `REACT_APP_` (this is required by Create React App).
+
+Example `.env`:
+```env
+REACT_APP_API_URL=http://localhost:3001
+REACT_APP_DANGEROUSLY_DISABLE_HOST_CHECK=false
+```
+- Copy `.env.example` and modify for your needs.
+- Never commit your actual `.env` file.
+
+**Do NOT place `.env` files inside `src/` or other subfolders.**
+
+More info: [Create React App: Adding Custom Environment Variables](https://create-react-app.dev/docs/adding-custom-environment-variables/)
+
+-----------
 
 ## Getting Started
 
