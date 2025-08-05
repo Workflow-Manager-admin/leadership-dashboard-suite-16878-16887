@@ -16,15 +16,36 @@ This project provides a minimal React template with a clean, modern UI and minim
 - File must be named exactly `.env` (no extension).
 - Any variable you wish to use in code must be prefixed with `REACT_APP_` (this is required by Create React App).
 
-Example `.env`:
+Example `.env` (see `.env.example` for the latest advanced use):
 ```env
 REACT_APP_API_URL=http://localhost:3001
-REACT_APP_DANGEROUSLY_DISABLE_HOST_CHECK=false
-# For preview/cloud/non-localhost dev: uncomment below to fix Invalid Host header errors
-# HOST=0.0.0.0
+REACT_APP_DANGEROUSLY_DISABLE_HOST_CHECK=false     # (Usually not needed; see advanced note below)
+# For preview/cloud/non-localhost dev: UNCOMMENT below to fix Invalid Host header errors
+HOST=0.0.0.0
 ```
 - Copy `.env.example` and modify for your needs.
 - Never commit your actual `.env` file.
+
+:warning: **Preview/Cloud environments and `Invalid Host header` error**  
+If you see an "Invalid Host header" or "You are running the app in development mode." but cannot access from preview/remotely, always set in your `.env`:
+```
+HOST=0.0.0.0
+```
+This tells the React dev server to accept connections from any host (not just localhost).  
+- Do **not** rely on REACT_APP_DANGEROUSLY_DISABLE_HOST_CHECK except as a last resort.
+- If using a non-localhost cloud or container environment, check that the preview platform does _not_ forcibly override HOST/PORT, and your `.env` variables are actually picked up on (sometimes "Reset environment" or clearing preview cache is needed).
+- Check `package.json` scripts: they should _not_ explicitly set `HOST` or `PORT` except via `.env`.
+- Advanced: For edge setups, you may need to set `PUBLIC_URL=http://your.preview.url` as well.
+
+If these fixes do _not_ resolve your preview error:
+- Your preview/container platform may be injecting or overriding env variables (`HOST`, `PORT`, `BROWSER`, etc.) at runtime.  
+- Check build logs in your preview for lines like "Detected environment variable override" or "Using Host ...".
+- See [Create React App: HOST documentation](https://create-react-app.dev/docs/advanced-configuration/#custom-environment-variables), [Invalid Host Header errors](https://github.com/facebook/create-react-app/issues/11203), or your preview platform's docs for details.
+- Never place `.env` in `/src` or other subfolders.
+- If you have ejected or customized your dev server (custom `server.js`), HOST/PORT mechanics may differ.
+
+**TLDR**: For 99% of preview/remote access issues:  
+Set `HOST=0.0.0.0` in the `.env` at the project root, _restart_ the server, and clear any platform or build caches before retrying.
 
 **Do NOT place `.env` files inside `src/` or other subfolders.**
 
