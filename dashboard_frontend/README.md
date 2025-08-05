@@ -20,11 +20,20 @@ Example `.env`:
 ```env
 REACT_APP_API_URL=http://localhost:3001
 REACT_APP_DANGEROUSLY_DISABLE_HOST_CHECK=false
+# For preview/cloud/non-localhost dev: uncomment below to fix Invalid Host header errors
+# HOST=0.0.0.0
 ```
 - Copy `.env.example` and modify for your needs.
 - Never commit your actual `.env` file.
 
 **Do NOT place `.env` files inside `src/` or other subfolders.**
+
+> #### Invalid Host header or cloud/preview access
+> If you see an "Invalid Host header" error on preview/cloud/remote/CI/CD/port-forwarded environments,
+> add `HOST=0.0.0.0` to your `.env` and restart the dev server. This tells React's dev server to accept requests from all hosts/ports, not just localhost, and is needed for browser access in container/preview/remote setups.
+> 
+> See [Create React App: HOST documentation](https://create-react-app.dev/docs/advanced-configuration/#custom-environment-variables)
+> and [Common Invalid Host Header issues](https://github.com/facebook/create-react-app/issues/11203) for details.
 
 More info: [Create React App: Adding Custom Environment Variables](https://create-react-app.dev/docs/adding-custom-environment-variables/)
 
